@@ -1,48 +1,31 @@
-const express = require('express');
-const router = express.Router();
-const path = require('path');
-const fs = require('fs');
-const db = require('./db/db.json');
+const router = require("express").Router();
+const path = require("path");
+const fs = require("fs");
+const shortid = require("shortid");
+let db = require("../db/db.json")
 
-function dbNotes() {
-    return JSON.parse(fs.readFileSync(db, "utf-8"));
-};
-
-// Request to Get All Notes
-router.get('/notes/', (req, res) => {
-    dbNotes();
-    res.json(dbNotes());
+router.get("/api/notes", (req, res)=>{
+    res.json(db);
 });
-
-//Request to Post All Notes
-router.post('/notes', (req, res) => {
-    const notes = dbNotes();
-    const newNote = {
-        id: Date.now(),
+router.post("/api/notes", (req, res)=>{
+    let newNote = {
+        id: shortid.generate(),
         title: req.body.title,
-        text: req.body.text
-    }
-    notes.push(newNote)
-    fs.writeFile(path.join(__dirname, '../db/db.json'), JSON.stringify(notes), (err) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(newNote);
-        }
-    })
+        text: req.body.text,
+    };
+    db.push(newNote);
+    fs.writeFileSync(path.join(__dirname, "../db/db.json"), JSON.stringify(db));
+    res.json(db);
 });
 
-//Request to Delete Notes with ID Specificity
-router.delete('/notes/:id', (req, res) => {
-    let notes = dbNotes();
-    notes = notes.filter((note => note.id !== parseInt(req.params.id)));
-    fs.writeFile(path.join(__dirname, '../db/db.json'), JSON.stringify(notes), (err) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(notes);
-        }
-    })
+//create delete route
+
+router.delete("/api/notes/:id", (req, res)=>{
+    db = db.filter((note)=> note.id !== req.params.id);
+    fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(db), error =>{
+        if (error) throw error;
+        res.sendStatus(200);
+    });
 })
 
 module.exports = router;

@@ -1,8 +1,7 @@
 const express = require('express')
 const app = express();
 const PORT = process.env.PORT || 5000;
-const apiRoute = require('./routes/apiroutes.js')
-const htmlRoute = require('./routes/htmlroutes.js')
+
 
 //Middleware
 app.use(express.urlencoded({
@@ -10,11 +9,11 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 //Set Static Folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 //Api Route
-app.use('/api', apiRoute);
+app.use(require("./routes/apiroutes"));
 //Html Route
-app.use('/', htmlRoute);
+app.use(require("./routes/htmlroutes"));
 
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
